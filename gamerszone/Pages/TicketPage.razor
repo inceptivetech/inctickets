@@ -1,0 +1,203 @@
+﻿@page "/tickets"
+@using gamerszone.Data;
+@using gamerszone.Iservices;
+@inject ITicketService ticketService;
+@inject IProjectService projectService;
+@inject ICategoryService categoryService;
+@using System.IO;
+@inject IWebHostEnvironment env;
+
+<h3>Tickets Page</h3>
+
+<p>
+<RadzenDataGrid Data="@tickets" Count="10" TItem="Ticket">
+    <Columns>
+        <RadzenDataGridColumn TItem="Ticket" Property="Id" Title="Ticket Id"></RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="Ticket" Property="TicketName" Title="Title"></RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="Ticket" Property="Project" Title="Project"></RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="Ticket" Property="PostedBy" Title="Posted by"></RadzenDataGridColumn>
+    </Columns>
+
+</RadzenDataGrid>
+</p>
+
+<p>
+    Add New Ticket
+</p>
+
+<p>
+    <EditForm Model="ticket" OnSubmit="Save">
+    <div class="row">
+        <div class="col-md-4"><RadzenText>Title</RadzenText> </div>
+        <div class="col-md-8">
+            <RadzenTextBox Name="txtFirstName" Placeholder="Will" @bind-Value="ticket.TicketName"></RadzenTextBox>
+        </div>
+    </div>
+    <br />
+    <div class="row">
+        <div class="col-md-4"><RadzenText>Severity</RadzenText> </div>
+        <div class="col-md-8">
+            <RadzenDropDown AllowClear="true" TValue="string" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+            AllowFiltering="true" Placeholder="Select ..." Data=@(sevirityList.Select(sv=>sv.Value))
+            @bind-Value="ticket.Severity" ></RadzenDropDown>
+        </div>
+    </div>
+    <br />
+   <div class="row">
+        <div class="col-md-4"><RadzenText>Project</RadzenText> </div>
+        <div class="col-md-8">
+            <RadzenDropDown AllowClear="true" TValue="string" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                            AllowFiltering="true" Placeholder="Select ..." Data=@(projects.Select(sv=>sv.ProjectName))
+                            @bind-Value="ticket.Project" ></RadzenDropDown>
+        </div>
+    </div>
+    <br />
+    <div class="row">
+        <div class="col-md-4"><RadzenText>Category</RadzenText> </div>
+        <div class="col-md-8">
+            <RadzenDropDown AllowClear="true" TValue="string" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                            AllowFiltering="true" Placeholder="Select ..." Data=@(categories.Select(sv=>sv.CategoryName))
+                            @bind-Value="ticket.Category" ></RadzenDropDown>
+        </div>
+    </div>
+    <br />
+    <div class="row">
+        <div class="col-md-4"><RadzenText>Description</RadzenText> </div>
+        <div class="col-md-8">
+                <RadzenHtmlEditor @bind-Value="ticket.TicketDescription" style="height: 200px; margin-bottom: 1rem;">
+                <RadzenHtmlEditorUndo />
+                <RadzenHtmlEditorRedo />
+                <RadzenHtmlEditorSeparator />
+                <RadzenHtmlEditorBold />
+                <RadzenHtmlEditorItalic />
+                <RadzenHtmlEditorUnderline />
+                <RadzenHtmlEditorStrikeThrough />
+                <RadzenHtmlEditorSeparator />
+                <RadzenHtmlEditorColor />
+                <RadzenHtmlEditorBackground />
+                <RadzenHtmlEditorRemoveFormat />
+            </RadzenHtmlEditor>
+        </div>
+    </div>
+    <div class="row">&nbsp;</div>
+    <div class="row">
+        <div class="col-md-4"><RadzenText>Attachment(s)</RadzenText></div>
+        <div class="col-md-8">
+            <InputFile id="Attach1" OnChange="OnInputFileChange" accept="image/*"  multiple></InputFile>
+                @*<RadzenUpload Accept="image/*" Url="Upload/issues" @bind-Value="ticket.Attach1" />*@
+        </div>
+    </div>
+
+    <div class="row">&nbsp;</div>
+
+
+    <div class="row">
+        <div class="col-md-4"></div>
+        <div class="col-md-8">
+            <RadzenButton ButtonType="ButtonType.Submit" Text="Add Ticket" ButtonStyle="ButtonStyle.Primary"></RadzenButton>
+            <RadzenButton Click="@ResetPage" Text="Reset" ButtonStyle="ButtonStyle.Danger"></RadzenButton>
+        </div>
+    </div>
+    </EditForm>
+</p>
+
+
+
+
+@code {
+    string nofileMessage = "No files selected";
+    IReadOnlyList<IBrowserFile> browserFiles ;
+    string[] fileNames = new string[0];
+
+
+    Ticket ticket = new Ticket();
+    List<Project> projects = new List<Project>();
+    List<Category> categories = new List<Category>();
+    List<Ticket> tickets = new List<Ticket>();
+    Dictionary<string, string> sevirityList = new Dictionary<string, string>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        GetProjectList();
+        GetCategoryList();
+        GetTickets();
+        sevirityList = SharedCollections.severityKey;
+
+    }
+
+    private void OnInputFileChange(InputFileChangeEventArgs e)
+    {
+        browserFiles = e.GetMultipleFiles();
+        nofileMessage = $"{browserFiles.Count} file(s) seected";
+        this.StateHasChanged();
+    }
+
+    private void GetProjectList()
+    {
+        projects = projectService.ProjectList();
+
+    }
+
+    private void GetCategoryList()
+    {
+        categories = categoryService.CategoryList();
+    }
+
+    private void GetTickets()
+    {
+        tickets = ticketService.TicketList();
+    }
+
+    private async void Save()
+    {
+        foreach(var file in browserFiles)
+        {
+            //Stream stream = file.OpenReadStream();
+            //var path = $"{env.WebRootPath}\\{file.Name}";
+            //FileStream fileStream = File.Create(path);
+            //await stream.CopyToAsync(fileStream);
+            //stream.Close();
+            //fileStream.Close();
+            UploadFile(file);
+            fileNames = fileNames.Append(file.Name).ToArray();
+        }
+
+        ticket.Attach1 = fileNames;
+        ticketService.SaveOrUpdate(ticket);
+        ResetPage();
+        GetTickets();
+        // GetAppUsers();
+    }
+    public async Task UploadFile(IBrowserFile file)
+    {
+        if (file != null )
+        {
+            var imagePath = @"\Upload";
+            var uploadPath = env.WebRootPath + imagePath;
+            if (!Directory.Exists(uploadPath))
+            {
+                Directory.CreateDirectory(uploadPath);
+            }
+            var fullPath = Path.Combine(uploadPath, file.Name);
+            using (FileStream fileStream = new FileStream(fullPath, FileMode.Create, FileAccess.Write))
+            {
+                // await file.(fileStream);
+                // fileStream.Write();
+                Stream stream = file.OpenReadStream();
+                await stream.CopyToAsync(fileStream);
+                stream.Close();
+            }
+        }
+    }
+
+    private void ResetPage()
+    {
+        ticket = new Ticket();
+    }
+    private void Delete(string ticketId)
+    {
+        ticketService.DeleteTicket(ticketId);
+        GetTickets();
+    }
+
+}

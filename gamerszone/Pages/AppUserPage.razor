@@ -1,0 +1,114 @@
+﻿@page "/users"
+
+@using gamerszone.Data
+@using gamerszone.Iservice
+@inject IAppUserService appUserService
+
+
+<h3>App Users</h3>
+
+@*<RadzenCard class="m-3">
+    <h3>Blog title </h3>
+    <div>
+        <div>
+            Technology
+        </div>
+        <div class="mt-3"> Description of blog </div>
+    </div>
+</RadzenCard>*@
+
+<p>
+    <RadzenButton Text="Add New User" ></RadzenButton>
+</p>
+
+<p>
+<RadzenDataGrid Data="@appUsers" Count="10" TItem="AppUser">
+    <Columns>
+        <RadzenDataGridColumn TItem="AppUser" Property="Id" Title="User Id"></RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="AppUser" Property="FirstName" Title="First Name"></RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="AppUser" Property="LastName" Title="Last Name"></RadzenDataGridColumn>
+    </Columns>
+
+</RadzenDataGrid>
+</p>
+<p>
+    Add New User
+</p>
+<p>
+    <div class="row">
+        <div class="col-md-4"><RadzenText>First Name</RadzenText> </div>
+        <div class="col-md-8">
+            <RadzenTextBox Name="txtFirstName" Placeholder="Will" @bind-Value="appUser.FirstName"></RadzenTextBox>
+            @*<input @bind="appUser.FirstName" placeholder="Will" />*@
+        </div>
+    </div>
+   @* <div class="row">
+        <RadzenLabel Text="FirstName" Component="txtFirstName"></RadzenLabel>
+        <RadzenTextBox Name="txtFirstName"></RadzenTextBox>
+    </div>*@
+    <br />
+    <div class="row">
+        <div class="col-md-4"><RadzenText>Last Name</RadzenText></div>
+        <div class="col-md-8">
+            <RadzenTextBox Name="txtLastName" @bind-Value="appUser.LastName" placeholder="Smith" />
+        </div>
+    </div>
+    <br />
+    <div class="row">
+        <div class="col-md-4"><RadzenText>Email</RadzenText> </div>
+        <div class="col-md-8">
+            <RadzenTextBox Name="txtEmail" @bind-Value="appUser.Email" placeholder="Email" />
+        </div>
+    </div>
+    <br />
+    <div class="row">
+        <div class="col-md-4"><RadzenText>Password </RadzenText></div>
+        <div class="col-md-8">
+            <RadzenTextBox Name="txtPassword" @bind-Value="appUser.Password" placeholder="some secret" />
+        </div>
+    </div>
+    <br />
+    <div class="row">
+        <div class="col-md-4"></div>
+        <div class="col-md-8">
+            <RadzenButton  Click="@Save" Text="Save" ButtonStyle="ButtonStyle.Primary"></RadzenButton>
+            <RadzenButton  Click="@ResetPage" Text="Reset" ButtonStyle="ButtonStyle.Danger" ></RadzenButton>
+        </div>
+    </div>
+</p>
+
+
+@code 
+{
+    AppUser appUser = new AppUser();
+    List<AppUser> appUsers = new List<AppUser>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        GetAppUsers();
+
+    }
+
+    private void GetAppUsers()
+    {
+        appUsers = appUserService.AppUserList();
+    }
+
+    private void Save()
+    {
+        appUserService.SaveOrUpdate(appUser);
+        ResetPage();
+        GetAppUsers();
+    }
+
+    private void ResetPage()
+    {
+        appUser = new AppUser();
+    }
+    private void Delete(string appUserId)
+    {
+        appUserService.DeleteAppUser(appUserId);
+        GetAppUsers();
+    }
+
+}
