@@ -1,5 +1,6 @@
 ﻿using gamerszone.Data;
 using gamerszone.Iservices;
+using gamerszone.Utilities;
 using MongoDB.Driver;
 
 namespace gamerszone.Services
@@ -35,10 +36,10 @@ namespace gamerszone.Services
 
         }
 
-        public void SaveOrUpdate(Ticket ticket)
+        public async void SaveOrUpdate(Ticket ticket)
         {
             // Logic for uploading file to wwwroot
-
+            var askGPTTool = new AskGPTTool("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");
             var ticketObj = _ticketTable.Find(x => x.Id == ticket.Id && x.active).FirstOrDefault();
             if (ticketObj != null)
             {
@@ -46,11 +47,31 @@ namespace gamerszone.Services
                 {
                     _ticketTable.ReplaceOne(t => t.Id == ticket.Id, ticket);
                 }
+                if(ticket.TicketDescription != null)
+                {
+                    var gptResponse = await askGPTTool.AskMe(ticket.TicketDescription, "davinci");
+                    if (gptResponse != null)
+                    {
+                        Console.WriteLine(gptResponse);
+                    }
+                }
+                
             }
             else
             {
                 if (_ticketTable != null) _ticketTable.InsertOne(ticket);
+                if (ticket.TicketDescription != null)
+                {
+                    var gptResponse = await askGPTTool.AskMe(ticket.TicketDescription, "davinci");
+                    if (gptResponse != null)
+                    {
+                        Console.WriteLine(gptResponse);
+                    }
+                }
             }
+            
+            
+
         }
 
         public Ticket TicketGetById(string id)

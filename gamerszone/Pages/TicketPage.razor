@@ -150,19 +150,22 @@
 
     private async void Save()
     {
-        foreach(var file in browserFiles)
+        if(browserFiles != null)
         {
-            //Stream stream = file.OpenReadStream();
-            //var path = $"{env.WebRootPath}\\{file.Name}";
-            //FileStream fileStream = File.Create(path);
-            //await stream.CopyToAsync(fileStream);
-            //stream.Close();
-            //fileStream.Close();
-            UploadFile(file);
-            fileNames = fileNames.Append(file.Name).ToArray();
+            foreach (var file in browserFiles)
+            {
+                //Stream stream = file.OpenReadStream();
+                //var path = $"{env.WebRootPath}\\{file.Name}";
+                //FileStream fileStream = File.Create(path);
+                //await stream.CopyToAsync(fileStream);
+                //stream.Close();
+                //fileStream.Close();
+                UploadFile(file);
+                fileNames = fileNames.Append(file.Name).ToArray();
+            }
+            ticket.Attach1 = fileNames;
         }
-
-        ticket.Attach1 = fileNames;
+       
         ticketService.SaveOrUpdate(ticket);
         ResetPage();
         GetTickets();

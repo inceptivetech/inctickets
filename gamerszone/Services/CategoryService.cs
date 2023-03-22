@@ -10,7 +10,7 @@ namespace gamerszone.Services
         private MongoClient? _mongoClient = null;
         private IMongoDatabase? _mongoDatabase = null;
         private IMongoCollection<Category>? _categoryTable = null;
-        public CategoryService() 
+        public CategoryService()
         {
             _mongoClient = new MongoClient("mongodb://127.0.0.1:27017");
             _mongoDatabase = _mongoClient.GetDatabase("trdb");
