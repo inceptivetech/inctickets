@@ -1,11 +1,19 @@
 ﻿@page "/login"
 
-@using gamerszone.Iservice;
 
+@using gamerszone.Iservices;
+@using System.Security.Claims;
+@using gamerszone.Utilities;
+@inject IAppUserService appUserService;
+@inject IJSRuntime js;
+@inject IAuthService authService;
+@inject NavigationManager navManager;
+@inject AuthenticationStateProvider authStateProvider;
 
-@inject IAppUserService appUserService
+        
 
 <h3>Login Page</h3>
+
 
 <div class="col-12 d-flex p-3">
     <RadzenCard class="d-flex m-5 p-0 rz-border-radius-6 rz-shadow-10" Style="width: 100%; flex-flow: row wrap; overflow: hidden; align-items: stretch;">
@@ -27,6 +35,7 @@
 
 @code {
 
+
     string userName = "admin";
     string password = "admin";
     bool rememberMe = true;
@@ -34,10 +43,39 @@
 
     //EventConsole console;
 
-    void OnLogin(LoginArgs args, string name)
+    async void OnLogin(LoginArgs args, string name)
     {
-        //  console.Log($"{name} -> Username: {args.Username}, password: {args.Password}, remember me: {args.RememberMe}");
-        appUserService.Authenticate(args.Username, args.Password);
+        LoggedInUser loggedIn = new LoggedInUser();
+
+
+        loggedIn = await authService.Authenticate(args.Username, args.Password);
+        if (loggedIn==null)
+        {
+            await js.InvokeVoidAsync("alert", "Invalid UserName or Password");
+            // return false;
+        }
+        var customAuthStateProvider = (CustomAuthenticationStateProvider)authStateProvider;
+
+        await customAuthStateProvider.UpdateAuthenticationState(new UserSession
+            {
+                UserName = args.Username,
+                Role = loggedIn.Role,
+                UserId = loggedIn.Id
+            });
+
+        navManager.NavigateTo("/",true);  
+
+        //ClaimsIdentity identity = new ClaimsIdentity(
+        //    new[]
+        //    {
+        //        new Claim(ClaimTypes.Name, args.Username)
+        //    }
+        //);
+
+        //var principal = new ClaimsPrincipal(identity);
+
+      //  await HttpContext.SignInAsync()
+
     }
 
     void OnRegister(string name)

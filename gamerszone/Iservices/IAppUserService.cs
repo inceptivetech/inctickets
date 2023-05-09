@@ -1,6 +1,6 @@
 ﻿using gamerszone.Data;
 
-namespace gamerszone.Iservice
+namespace gamerszone.Iservices
 {
     public interface IAppUserService
     {
@@ -11,6 +11,6 @@ namespace gamerszone.Iservice
 
         string DeleteAppUser(string id);
 
-        void Authenticate(string username, string password);
+        
     }
 }

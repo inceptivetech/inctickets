@@ -1,5 +1,5 @@
 ﻿using gamerszone.Data;
-using gamerszone.Iservice;
+using gamerszone.Iservices;
 using gamerszone.Utilities;
 using MongoDB.Driver;
 using System.Text;
@@ -48,37 +48,7 @@ namespace gamerszone.Services
             return "Failed";
             
         }
-        public async void Authenticate(string username, string password)
-        {
-            EncyptTool encyptTool = new EncyptTool();
-
-            try
-            {
-                var encData = await encyptTool.EncryptAsync(password, username);
-                string encString = BitConverter.ToString(encData);
-                if (username != null || password != null)
-                {
-                    var appUser = _appUserTable.Find(x=>x.Email ==  username && x.Password == encString && x.active).FirstOrDefault();
-                    if (appUser != null)
-                    {
-                        Console.WriteLine("Success");
-                    }
-                    else
-                    {
-                        Console.WriteLine("failed");
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("failed");
-                }
-            }
-            catch (SystemException ex)
-            {
-                throw ex;
-            }
-        }
-
+        
         public async void SaveOrUpdate(AppUser user)
         {
             /*

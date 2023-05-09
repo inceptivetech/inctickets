@@ -13,8 +13,10 @@ namespace gamerszone.Data
         public string Email { get; set; }
         public string Password { get; set; }    
         public string EmailVerified { get; set; }
-
+        public string Role { get; set; }
         public bool active { get; set; } = false;
 
     }
+
+   
 }

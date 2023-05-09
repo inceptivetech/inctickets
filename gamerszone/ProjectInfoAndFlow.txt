@@ -1,0 +1,9 @@
+﻿This document will be majorly for the notes taking activity
+09-05-2023
+Two main roles at this point, admin and user
+
+Admin user will have the rights to add/modify/delete the projects and categories in the system
+
+User will have the access of raising the ticket and viewing the updates on the tickets
+
+Lets first implement those views here
