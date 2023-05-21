@@ -10,6 +10,8 @@
 <h3>Tickets Page</h3>
 
 <p>
+<!-- Lets move this code and use panels here-->
+<!--
 <RadzenDataGrid Data="@tickets" Count="10" TItem="Ticket">
     <Columns>
         <RadzenDataGridColumn TItem="Ticket" Property="Id" Title="Ticket Id"></RadzenDataGridColumn>
@@ -19,6 +21,52 @@
     </Columns>
 
 </RadzenDataGrid>
+-->
+
+<RadzenPanel AllowCollapse="false" class="rz-my-10 rz-mx-auto" Style="width:96%;">
+    <HeaderTemplate>
+            <RadzenText TextStyle="TextStyle.H6" Class="rz-display-flex rz-align-items-center rz-m-0">
+                <RadzenIcon Icon="account_box" class="rz-mr-1" /><b>Tickets</b>
+            </RadzenText>
+    </HeaderTemplate>
+        <ChildContent>
+            <RadzenCard class="rz-mt-4">
+                <RadzenDataList PageSize="4" WrapItems="true" AllowPaging="true"
+                                Data="@tickets" TItem="Ticket">
+                    <Template Context="ticket">
+                        <RadzenCard Style="width: 450px">
+                            <RadzenRow>
+                                <RadzenColumn Size="8" class="rz-text-truncate">
+                                    @*<RadzenBadge BadgeStyle="BadgeStyle.Light" Text=@($"{ticket.Id}") class="me-1" />*@
+                                    <a href="/ticketdetails/@($"{ticket.Id}")"> <b>@(ticket.TicketName)</b> </a>
+                                </RadzenColumn>
+                               @* <RadzenColumn Size="4" class="rz-text-align-end">
+                                    <RadzenBadge BadgeStyle="BadgeStyle.Success" Text=@($"{String.Format(new System.Globalization.CultureInfo("en-US"), "{0:C}", order.Freight)}") />
+                                </RadzenColumn>*@
+                            </RadzenRow>
+                            <hr style="border: none; background-color: var(--rz-text-disabled-color); height: 1px; margin: 1rem 0;" />
+                            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem">
+                              @*  <RadzenImage Path="@order.Employee?.Photo" Style="width: 80px; height: 80px; border-radius: 50%" />*@
+                                <RadzenStack Gap="0">
+                                    <RadzenText TextStyle="TextStyle.H6" Class="rz-mb-0">@(ticket.Project)</RadzenText>
+                                        <RadzenText TextStyle="TextStyle.Body1">@ticket.Category</RadzenText>
+                                        <RadzenText TextStyle="TextStyle.Body2">@(ticket.Severity)</RadzenText>
+                                    </RadzenStack>
+                                </RadzenStack>
+                            </RadzenCard>
+                        </Template>
+                    </RadzenDataList>
+                </RadzenCard>
+            </ChildContent>
+            <SummaryTemplate>
+                <RadzenCard class="rz-mt-4">
+                    <b>@tickets.Count() Tickets</b>
+                </RadzenCard>
+            </SummaryTemplate>
+
+
+</RadzenPanel>
+
 </p>
 
 <p>
@@ -83,7 +131,7 @@
     <div class="row">
         <div class="col-md-4"><RadzenText>Attachment(s)</RadzenText></div>
         <div class="col-md-8">
-            <InputFile id="Attach1" OnChange="OnInputFileChange" accept="image/*"  multiple></InputFile>
+            <InputFile id="Attach1" OnChange="OnInputFileChange" accept="image/*"   multiple ></InputFile>
                 @*<RadzenUpload Accept="image/*" Url="Upload/issues" @bind-Value="ticket.Attach1" />*@
         </div>
     </div>
@@ -104,7 +152,7 @@
 
 
 
-@code {
+    @code {
     string nofileMessage = "No files selected";
     IReadOnlyList<IBrowserFile> browserFiles ;
     string[] fileNames = new string[0];
@@ -113,7 +161,7 @@
     Ticket ticket = new Ticket();
     List<Project> projects = new List<Project>();
     List<Category> categories = new List<Category>();
-    List<Ticket> tickets = new List<Ticket>();
+    IEnumerable<Ticket> tickets;
     Dictionary<string, string> sevirityList = new Dictionary<string, string>();
 
     protected override async Task OnInitializedAsync()
@@ -160,8 +208,12 @@
                 //await stream.CopyToAsync(fileStream);
                 //stream.Close();
                 //fileStream.Close();
-                UploadFile(file);
-                fileNames = fileNames.Append(file.Name).ToArray();
+                string newFileName = DateTime.Now.ToString("yyMMddHHmmssff");
+                string fileExtension = string.Empty;
+                fileExtension = Path.GetExtension(file.Name);
+
+                UploadFile(file,newFileName+fileExtension);
+                fileNames = fileNames.Append(newFileName+fileExtension).ToArray();
             }
             ticket.Attach1 = fileNames;
         }
@@ -171,7 +223,7 @@
         GetTickets();
         // GetAppUsers();
     }
-    public async Task UploadFile(IBrowserFile file)
+    public async Task UploadFile(IBrowserFile file, string newFileName)
     {
         if (file != null )
         {
@@ -181,7 +233,7 @@
             {
                 Directory.CreateDirectory(uploadPath);
             }
-            var fullPath = Path.Combine(uploadPath, file.Name);
+            var fullPath = Path.Combine(uploadPath, newFileName);
             using (FileStream fileStream = new FileStream(fullPath, FileMode.Create, FileAccess.Write))
             {
                 // await file.(fileStream);

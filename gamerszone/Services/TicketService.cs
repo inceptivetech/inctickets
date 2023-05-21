@@ -49,11 +49,11 @@ namespace gamerszone.Services
                 }
                 if(ticket.TicketDescription != null)
                 {
-                    var gptResponse = await askGPTTool.AskMe(ticket.TicketDescription, "davinci");
-                    if (gptResponse != null)
-                    {
-                        Console.WriteLine(gptResponse);
-                    }
+                    //var gptResponse = await askGPTTool.AskMe(ticket.TicketDescription, "davinci");
+                    //if (gptResponse != null)
+                    //{
+                    //    Console.WriteLine(gptResponse);
+                    //}
                 }
                 
             }
@@ -62,11 +62,11 @@ namespace gamerszone.Services
                 if (_ticketTable != null) _ticketTable.InsertOne(ticket);
                 if (ticket.TicketDescription != null)
                 {
-                    var gptResponse = await askGPTTool.AskMe(ticket.TicketDescription, "davinci");
-                    if (gptResponse != null)
-                    {
-                        Console.WriteLine(gptResponse);
-                    }
+                    //var gptResponse = await askGPTTool.AskMe(ticket.TicketDescription, "davinci");
+                    //if (gptResponse != null)
+                    //{
+                    //    Console.WriteLine(gptResponse);
+                    //}
                 }
             }
             

@@ -1,0 +1,76 @@
+﻿@page "/ticketdetails/{Id}"
+@*@inject Microsoft.AspNetCore.Components.RouteData RouteData
+*@
+@using gamerszone.Data
+@using gamerszone.Iservices
+@inject ITicketService ticketService;
+
+<h3>TicketDetails</h3>
+
+<RadzenPanel AllowCollapse="false" class="rz-my-10 rz-mx-auto" Style="width:96%;">
+    <HeaderTemplate>
+        <RadzenText TextStyle="TextStyle.H6" Class="rz-display-flex rz-align-items-center rz-m-0">
+            <RadzenIcon Icon="account_box" class="rz-mr-1" /><b>@ticketDetails?.TicketName</b>
+        </RadzenText>
+    </HeaderTemplate>
+    <ChildContent>
+        <RadzenCard class="rz-mt-12">
+            <RadzenText TextStyle="TextStyle.H6" class="rz-color-primary-light"><strong>Ticket Information</strong></RadzenText>
+            <RadzenCard class="rz-background-color-primary-lighter rz-shadow-0 rz-border-radius-0 rz-p-8" style="margin: 1rem calc(-1 * var(--rz-card-padding));">
+                <RadzenRow RowGap="0">
+                    <RadzenColumn SizeSM="6">
+                        <RadzenText TextStyle="TextStyle.Overline" class="rz-color-primary-light rz-display-flex rz-mt-4 rz-mb-0">Project</RadzenText>
+                        <RadzenText TextStyle="TextStyle.Body1"><b>@(ticketDetails?.Project)</b></RadzenText>
+                        <RadzenText TextStyle="TextStyle.Overline" class="rz-color-primary-light rz-display-flex rz-mt-4 rz-mb-0">Severity</RadzenText>
+                        <RadzenText TextStyle="TextStyle.Body1"><b>@(ticketDetails?.Severity)</b></RadzenText>
+                    </RadzenColumn>
+                    <RadzenColumn SizeSM="6">
+                        <RadzenText TextStyle="TextStyle.Overline" class="rz-color-primary-light rz-display-flex rz-mt-4 rz-mb-0">Category</RadzenText>
+                        <RadzenText TextStyle="TextStyle.Body1"><b>@(ticketDetails?.Category)</b></RadzenText>
+                        <RadzenText TextStyle="TextStyle.Overline" class="rz-color-primary-light rz-display-flex rz-mt-4 rz-mb-0">Posted by</RadzenText>
+                        <RadzenText TextStyle="TextStyle.Body1"><b>@ticketDetails?.PostedBy</b></RadzenText>
+                    </RadzenColumn>
+                </RadzenRow>
+            </RadzenCard>
+            <RadzenCard class="rt-mt-10"> 
+                <RadzenText TextStyle="TextStyle.H6" class="rz-color-primary-light"><strong>Ticket Description</strong></RadzenText>
+                <RadzenText TextStyle="TextStyle.Body1">@ticketDetails?.TicketDescription</RadzenText>
+            </RadzenCard>
+            <RadzenCard class="rt-mt-10">
+                <RadzenText TextStyle="TextStyle.H6" class="rz-color-primary-light"><strong>Files uploaded</strong></RadzenText>
+                
+                @foreach(string imgs in ticketDetails.Attach1)
+                {
+                    <RadzenText TextStyle="TextStyle.Body1"><b>@imgs.ToString()</b></RadzenText>
+                }
+
+            </RadzenCard>
+
+          </RadzenCard>
+          
+        
+        </ChildContent>
+        <SummaryTemplate>
+            <RadzenCard class="rz-mt-4">
+                <b>@ticketDetails.TicketName</b>
+            </RadzenCard>
+        </SummaryTemplate>
+
+
+    </RadzenPanel>
+
+
+@code {
+    [Parameter]
+    public string Id { get; set; }
+    Ticket ticketDetails = new Ticket();
+
+    protected override void OnInitialized()
+    {
+        GetTicketDetails(Id);
+    }
+    private void GetTicketDetails(string Id)
+    {
+        ticketDetails = ticketService.TicketGetById(Id);
+    }
+}
